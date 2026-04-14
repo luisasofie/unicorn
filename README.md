@@ -12,9 +12,9 @@ This extension is fully compatible with TYPO3 v14.
 
 Clone the repository into your typo3conf/ext/ directory or install it via Composer:
 
-`Bash
-composer require luisasofie/unicorn
-Activate the extension in the Extension Manager or via CLI.`
+Bash : `composer require luisasofie/unicorn`
+
+Activate the extension in the Extension Manager or via CLI.
 
 Reload the backend and enjoy the ride!
 
