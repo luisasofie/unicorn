@@ -35,7 +35,7 @@ Adds an interactive, animated unicorn that gallops across the TYPO3 backend — 
 Install via Composer:
 
 ```bash
-composer req luisasofie/unicorn
+composer require luisasofie/unicorn
 ```
 
 Then activate the extension:
@@ -65,5 +65,6 @@ Or install and activate via the TYPO3 Extension Manager.
 ## Credits
 
 This extension was created by Luisa Sofie Faßbender in 2026.
+Thanks to Jochen Roth for the brilliant support <3 
 
 [Find more TYPO3 extensions](https://extensions.typo3.org) that help deliver value in TYPO3 projects.
