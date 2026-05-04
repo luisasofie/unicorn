@@ -4,8 +4,8 @@
 	"description": "A magical unicorn that runs and jumps across the TYPO3 backend.",
 	"license": "GPL-2.0-or-later",
 	"require": {
-		"typo3/cms-backend": "*",
-		"typo3/cms-core": "*"
+		"typo3/cms-backend": "^14.0",
+		"typo3/cms-core": "^14.0"
 	},
 	"autoload": {
 		"psr-4": {

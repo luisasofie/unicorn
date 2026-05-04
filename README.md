@@ -26,7 +26,7 @@ composer require luisasofie/unicorn
 
 Activate the extension in the Extension Manager or via CLI.
 
-Reload the backend and enjoy the ride!
+## Credits
 
 ## 🛠 Technical Details
 
@@ -34,4 +34,4 @@ The extension uses lightweight JavaScript to listen for keyboard events and
 render animations within the backend viewport. It is designed to be
 non-intrusive and does not affect the performance of the core system.
 
-Have fun jumping! 🌈
+[Find more TYPO3 extensions](https://extensions.typo3.org) that help deliver value in TYPO3 projects.

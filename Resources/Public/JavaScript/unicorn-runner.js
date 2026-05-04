@@ -33,6 +33,9 @@ class UnicornRunner {
         this.running = false;
         this.paused = false;
         this.jumpHeightRatio = 0.15;
+        this.lastUpKeyTime = 0;
+        this.upKeyCombo = 0;
+        this.upsideDown = false;
         this.#init();
     }
 
@@ -42,8 +45,14 @@ class UnicornRunner {
         }
         const jumpHeight = window.innerHeight * this.jumpHeightRatio;
         const frames = UnicornRunner.JUMP_DURATION_FRAMES;
-        this.gravity = (2 * jumpHeight) / (frames / 2) ** 2;
-        this.velocityY = -(2 * jumpHeight) / (frames / 2);
+        if (this.upsideDown) {
+            // Jump away from ceiling: positive velocity, negative gravity pulls back up
+            this.gravity = -((2 * jumpHeight) / (frames / 2) ** 2);
+            this.velocityY = (2 * jumpHeight) / (frames / 2);
+        } else {
+            this.gravity = (2 * jumpHeight) / (frames / 2) ** 2;
+            this.velocityY = -(2 * jumpHeight) / (frames / 2);
+        }
         this.isJumping = true;
     }
 
@@ -109,18 +118,28 @@ class UnicornRunner {
                 return;
             }
             if (e.key === 'ArrowUp') {
+                const pressTime = performance.now();
+                if (pressTime - this.lastUpKeyTime < 400) {
+                    this.upKeyCombo++;
+                } else {
+                    this.upKeyCombo = 1;
+                }
+                this.lastUpKeyTime = pressTime;
                 this.jumpHeightRatio = Math.min(
                     UnicornRunner.MAX_JUMP_RATIO,
                     this.jumpHeightRatio + UnicornRunner.JUMP_STEP
                 );
                 this.#jump();
+                if (this.upKeyCombo === 2) {
+                    this.upKeyCombo = 0;
+                    this.#triggerStarShower(pressTime);
+                }
             }
             if (e.key === 'ArrowDown') {
-                this.jumpHeightRatio = Math.max(
-                    UnicornRunner.MIN_JUMP_RATIO,
-                    this.jumpHeightRatio - UnicornRunner.JUMP_STEP
-                );
-                this.#jump();
+                this.upsideDown = !this.upsideDown;
+                this.isJumping = false;
+                this.y = 0;
+                this.velocityY = 0;
             }
             if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
                 e.preventDefault();
@@ -182,37 +201,121 @@ class UnicornRunner {
             filter: `drop-shadow(0 0 3px ${colors[Math.floor(Math.random() * colors.length)]})`,
             transition: 'none',
         });
+        const topY = -(window.innerHeight - UnicornRunner.UNICORN_SIZE);
+        const spawnY = this.upsideDown
+            ? topY + this.y + 16
+            : this.y + (UnicornRunner.UNICORN_SIZE - 84);
+        const spawnVy = this.upsideDown ? (1 + Math.random() * 2) : -(1 + Math.random() * 2);
         this.container.appendChild(el);
         this.sparkles.push({
             el,
             x: this.x + behindOffset,
-            y: this.y + (UnicornRunner.UNICORN_SIZE - 84),
+            y: spawnY,
             vx: (Math.random() - 0.5) * 1.5,
-            vy: -(1 + Math.random() * 2),
+            vy: spawnVy,
             born: now,
             rotation: Math.random() * 360,
             rotationSpeed: (Math.random() - 0.5) * 8,
+            gravity: this.upsideDown ? -0.05 : undefined,
         });
     }
 
     #updateSparkles(now) {
         for (let i = this.sparkles.length - 1; i >= 0; i--) {
             const s = this.sparkles[i];
+            const lifetime = s.lifetime ?? UnicornRunner.SPARKLE_LIFETIME;
             const age = now - s.born;
-            if (age > UnicornRunner.SPARKLE_LIFETIME) {
+            if (age > lifetime) {
                 s.el.remove();
                 this.sparkles.splice(i, 1);
                 continue;
             }
             s.x += s.vx;
             s.y += s.vy;
-            s.vy += 0.05;
+            s.vy += s.gravity ?? 0.05;
             s.rotation += s.rotationSpeed;
-            const opacity = 1 - age / UnicornRunner.SPARKLE_LIFETIME;
+            const opacity = 1 - age / lifetime;
             const scale = 0.5 + opacity * 0.5;
             s.el.style.transform = `translate(${s.x}px, ${s.y}px) rotate(${s.rotation}deg) scale(${scale})`;
             s.el.style.opacity = String(opacity);
         }
+    }
+
+    #triggerStarShower(now) {
+        const symbols = UnicornRunner.SPARKLE_SYMBOLS;
+        const fragment = document.createDocumentFragment();
+
+        // 5 random bursts spread across the viewport
+        for (let b = 0; b < 5; b++) {
+            const burstX = Math.random() * window.innerWidth;
+            const burstY = -(window.innerHeight * (0.1 + Math.random() * 0.8));
+
+            for (let i = 0; i < 12; i++) {
+                const angle = (Math.PI * 2 * i) / 12 + Math.random() * 0.4;
+                const speed = 2 + Math.random() * 4;
+                const el = document.createElement('span');
+                el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                Object.assign(el.style, {
+                    position: 'absolute',
+                    bottom: '0',
+                    left: '0',
+                    fontSize: (14 + Math.random() * 14) + 'px',
+                    lineHeight: '1',
+                    pointerEvents: 'none',
+                    willChange: 'transform, opacity',
+                    transition: 'none',
+                });
+                fragment.appendChild(el);
+                this.sparkles.push({
+                    el,
+                    x: burstX,
+                    y: burstY,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 1.5,
+                    born: now,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 12,
+                    lifetime: 1400,
+                    gravity: 0.08,
+                });
+            }
+        }
+
+        // Radial explosion burst from the unicorn's current position
+        const topY = -(window.innerHeight - UnicornRunner.UNICORN_SIZE);
+        const explosionX = this.x + UnicornRunner.UNICORN_SIZE / 2;
+        const explosionY = (this.upsideDown ? topY + this.y : this.y) - UnicornRunner.UNICORN_SIZE / 2;
+        for (let i = 0; i < 60; i++) {
+            const angle = (Math.PI * 2 * i) / 60 + Math.random() * 0.3;
+            const speed = 3 + Math.random() * 8;
+            const el = document.createElement('span');
+            el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+            Object.assign(el.style, {
+                position: 'absolute',
+                bottom: '0',
+                left: '0',
+                fontSize: (18 + Math.random() * 22) + 'px',
+                lineHeight: '1',
+                pointerEvents: 'none',
+                willChange: 'transform, opacity',
+                transition: 'none',
+            });
+            fragment.appendChild(el);
+            this.sparkles.push({
+                el,
+                x: explosionX,
+                y: explosionY,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 2,
+                born: now,
+                rotation: Math.random() * 360,
+                rotationSpeed: (Math.random() - 0.5) * 15,
+                lifetime: 2000,
+                gravity: 0.1,
+            });
+        }
+
+        this.container.appendChild(fragment); // single DOM insertion
     }
 
     #loop() {
@@ -236,7 +339,8 @@ class UnicornRunner {
             this.y += this.velocityY;
             this.velocityY += this.gravity;
 
-            if (this.y >= 0) {
+            const landed = this.upsideDown ? this.y <= 0 : this.y >= 0;
+            if (landed) {
                 this.y = 0;
                 this.velocityY = 0;
                 this.isJumping = false;
@@ -245,11 +349,16 @@ class UnicornRunner {
 
         // Apply position
         const scaleX = this.direction === 1 ? -1 : 1;
-        this.unicorn.style.transform = `translateX(${this.x}px) translateY(${this.y}px) scaleX(${scaleX})`;
-
-        // Bobbing animation while running (only when on ground)
-        const bob = this.isJumping ? 0 : Math.sin(now * 0.01) * 2;
-        this.unicorn.style.transform += ` translateY(${bob}px)`;
+        if (this.upsideDown) {
+            const topY = -(window.innerHeight - UnicornRunner.UNICORN_SIZE);
+            const bob = this.isJumping ? 0 : Math.sin(now * 0.01) * 2;
+            this.unicorn.style.transform = `translateX(${this.x}px) translateY(${topY + this.y - bob}px) scaleX(${scaleX}) scaleY(-1)`;
+        } else {
+            this.unicorn.style.transform = `translateX(${this.x}px) translateY(${this.y}px) scaleX(${scaleX})`;
+            // Bobbing animation while running (only when on ground)
+            const bob = this.isJumping ? 0 : Math.sin(now * 0.01) * 2;
+            this.unicorn.style.transform += ` translateY(${bob}px)`;
+        }
 
         // Poop sparkles behind the unicorn
         if (now - this.lastSparkleTime > UnicornRunner.SPARKLE_INTERVAL) {
