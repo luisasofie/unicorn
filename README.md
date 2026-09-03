@@ -73,5 +73,6 @@ GPL-2.0-or-later — see [LICENSE.txt](LICENSE.txt).
 ## Credits
 
 This extension was created by Luisa Sofie Faßbender in 2026.
+Thanks to Jochen Roth for the brilliant support <3 
 
 [Find more TYPO3 extensions](https://extensions.typo3.org) that help deliver value in TYPO3 projects.
