@@ -53,6 +53,11 @@ controls, the easter eggs and how the extension hooks into the backend.
 
 ## Changelog
 
+### 1.0.2
+- Added the extension documentation under [`Documentation/`](Documentation/)
+- Added `LICENSE.txt` and completed the package metadata (PHP requirement, keywords, homepage, author and support links)
+- Corrected the documented arrow-key behaviour: the speed keys are relative to the unicorn's direction of travel
+
 ### 1.0.1
 - Added upside-down mode: unicorn runs across the top of the backend when pressing `Arrow Down`, with mirrored jump physics and sparkle trail
 - Added double `Arrow Up` easter egg: full-screen star shower combined with a radial explosion burst from the unicorn's position

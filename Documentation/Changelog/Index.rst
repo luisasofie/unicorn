@@ -6,6 +6,17 @@
 Changelog
 =========
 
+..  _changelog-1-0-2:
+
+1.0.2
+=====
+
+*   Added the extension documentation under :file:`Documentation/`
+*   Added :file:`LICENSE.txt` and completed the package metadata
+    (PHP requirement, keywords, homepage, author and support links)
+*   Corrected the documented arrow-key behaviour: the speed keys are relative
+    to the unicorn's direction of travel, not to a fixed left/right mapping
+
 ..  _changelog-1-0-1:
 
 1.0.1

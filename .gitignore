@@ -6,3 +6,6 @@ vendor/
 # Editors
 .idea/
 .vscode/
+
+# Documentation build output
+.docs-build/
