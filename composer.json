@@ -3,7 +3,28 @@
 	"type": "typo3-cms-extension",
 	"description": "A magical unicorn that runs and jumps across the TYPO3 backend.",
 	"license": "GPL-2.0-or-later",
+	"homepage": "https://github.com/luisasofie/unicorn",
+	"keywords": [
+		"typo3",
+		"typo3 cms",
+		"extension",
+		"backend",
+		"unicorn",
+		"fun",
+		"easter egg"
+	],
+	"authors": [
+		{
+			"name": "Luisa Sofie Faßbender",
+			"role": "Developer"
+		}
+	],
+	"support": {
+		"issues": "https://github.com/luisasofie/unicorn/issues",
+		"source": "https://github.com/luisasofie/unicorn"
+	},
 	"require": {
+		"php": "^8.2",
 		"typo3/cms-backend": "^14.0",
 		"typo3/cms-core": "^14.0"
 	},

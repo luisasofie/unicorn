@@ -1,1 +1,8 @@
 vendor/
+
+# OS
+.DS_Store
+
+# Editors
+.idea/
+.vscode/
